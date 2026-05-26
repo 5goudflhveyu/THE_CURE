@@ -1,115 +1,4 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juego Canvas</title>
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    background: #111;
-}
-canvas {
-    display: block;
-    background: #222;
-}
-</style>
-</head>
-<body>
-
-<canvas id="game"></canvas>
-
-<script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let currentLevel = 1;
-
-const player = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    w: 40,
-    h: 40,
-    speed: 5,
-    health: 100
-};
-
-const keys = {};
-const creatures = [];
-const spells = [];
-const particles = [];
-
-window.addEventListener('keydown', e => keys[e.key] = true);
-window.addEventListener('keyup', e => keys[e.key] = false);
-
-function updatePlayer() {
-
-    if (keys['w']) player.y -= player.speed;
-    if (keys['s']) player.y += player.speed;
-    if (keys['a']) player.x -= player.speed;
-    if (keys['d']) player.x += player.speed;
-}
-
-function drawPlayer() {
-
-    ctx.fillStyle = '#44aaff';
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-}
-
-function drawShadow(x, y, w, h) {
-
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(x + 5, y + 5, w, h);
-}
-
-function damagePlayer(amount) {
-
-    player.health -= amount;
-
-    if (player.health < 0) {
-        player.health = 0;
-    }
-}
-
-function spawnCreatures(level) {
-
-    let list = [];
-
-    for (let i = 0; i < level * 5; i++) {
-
-        list.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            w: 30,
-            h: 30,
-            speed: 1 + Math.random() * 2
-        });
-    }
-
-    return list;
-}
-
-let spawned = spawnCreatures(currentLevel);
-
-function updateCreatures() {
-
-    spawned.forEach(c => {
-
-        let dx = player.x - c.x;
-        let dy = player.y - c.y;
-
-        let dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 400) {
-
-            c.x += (dx / dist) * c.speed;
-            c.y += (dy / dist) * c.speed;
-        }
-
         if (dist < 50) {
             damagePlayer(0.1);
         }
@@ -118,19 +7,18 @@ function updateCreatures() {
 
 function drawCreatures() {
 
-    spawned.forEach(c => {
+    creatures.forEach(c => {
+
+        ctx.fillStyle = "#ff4444";
+        ctx.fillRect(c.x, c.y, c.w, c.h);
 
         drawShadow(c.x, c.y, c.w, c.h);
-
-        ctx.fillStyle = '#ff4444';
-        ctx.fillRect(c.x, c.y, c.w, c.h);
     });
 }
 
-function updateSpells() {}
-function drawSpells() {}
-function updateParticles() {}
-function drawParticles() {}
+/* ============================================================
+COLISIONES
+============================================================ */
 
 function isColliding(a, b) {
 
@@ -147,15 +35,12 @@ function fastDistance(a, b) {
     let dx = a.x - b.x;
     let dy = a.y - b.y;
 
-    return dx * dx + dy * dy;
+    return dx*dx + dy*dy;
 }
 
-function drawHUD() {
-
-    ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
-    ctx.fillText('Vida: ' + Math.floor(player.health), 20, 30);
-}
+/* ============================================================
+GAME LOOP
+============================================================ */
 
 function gameLoop() {
 
@@ -170,12 +55,12 @@ function gameLoop() {
     drawCreatures();
     drawSpells();
     drawParticles();
-    drawHUD();
 
     requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
+
 </script>
 
 </body>
